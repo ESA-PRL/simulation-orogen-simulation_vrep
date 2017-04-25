@@ -1,0 +1,23 @@
+# Generated from orogen/lib/orogen/templates/tasks/tasks.pc
+
+prefix=/home/gigabyte/ROCK/install
+exec_prefix=${prefix}
+libdir=${prefix}/lib/orocos
+includedir=${prefix}/include/orocos
+
+
+
+project_name=simulation_vrep
+deffile=${prefix}/share/orogen/simulation_vrep.orogen
+task_models=simulation_vrep::Task
+typekits=simulation_vrep base orocos std
+
+Name: simulation_vrepTasks
+Version: 0.0
+Description: tasks defined for the simulation_vrep oroGen project
+Requires: 
+
+Libs:  -L${libdir} -lsimulation_vrep-tasks-gnulinux
+
+Cflags: -I${includedir} -I${includedir}/simulation_vrep/types -I/home/gigabyte/ROCK/install/include/orocos -I/home/gigabyte/ROCK/install/include/orocos/base/types -I/home/gigabyte/ROCK/install/include -DOROCOS_TARGET=gnulinux -I/home/gigabyte/ROCK/install/include/base/backward -I/usr/include/eigen3 -I/home/gigabyte/ROCK/install/include/orocos/std/types -I/home/gigabyte/ROCK/install/include/orocos -I/home/gigabyte/ROCK/install/include/orocos/logger/types -DOROCOS_TARGET=gnulinux -I/home/gigabyte/ROCK/install/include -I/home/gigabyte/ROCK/install/include/orocos/base/types -I/home/gigabyte/ROCK/install/include/base/backward -I/usr/include/eigen3 -I/home/gigabyte/ROCK/install/include/orocos/std/types -I/home/gigabyte/ROCK/install/include/orocos -I/home/gigabyte/ROCK/install/include/orocos/std/types -DOROCOS_TARGET=gnulinux -I/home/gigabyte/ROCK/install/include
+

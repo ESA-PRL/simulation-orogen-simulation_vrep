@@ -1,0 +1,12 @@
+prefix=/home/gigabyte/ROCK/install
+exec_prefix=${prefix}
+libdir=${prefix}/lib/orocos
+includedir=${prefix}/include/orocos
+
+project_name=simulation_vrep
+deffile=${prefix}/share/orogen/simulation_vrep.orogen
+type_registry=${prefix}/share/orogen/simulation_vrep.tlb
+
+Name: simulation_vrep
+Version: 0.0
+Description: the definition file for the orogen project itself
