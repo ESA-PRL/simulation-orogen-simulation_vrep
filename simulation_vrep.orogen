@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+name "simulation_vrep"
+
+using_library "vrep"
+
+import_types_from "std"
+import_types_from "base"
+import_types_from "simulation_vrepTypes.hpp"
+
+task_context "Task" do
+    needs_configuration
+
+    input_port("joints_commands", "/base/commands/Joints")
+
+    output_port("joints_readings", "/base/samples/Joints")
+
+    periodic 0.1
+end
