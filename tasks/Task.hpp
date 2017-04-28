@@ -49,14 +49,6 @@ namespace simulation_vrep
         base::Waypoint currentWaypoint;
         base::samples::RigidBodyState gps_heading_input;
 
-        float yaw_drift;
-        bool gps_rtk_fix;
-
-        // PTU stuff
-        double pan_set, tilt_set, pan_angle, tilt_angle;
-        int ptu_pan_motor_handler, ptu_tilt_motor_handler;
-        base::samples::frame::Frame left_frame, right_frame;
-        RTT::extras::ReadOnlyPointer<base::samples::frame::Frame> ptr_left_frame, ptr_right_frame;
     public:
         Task(std::string const& name = "simulation_vrep::Task");
         Task(std::string const& name, RTT::ExecutionEngine* engine);
