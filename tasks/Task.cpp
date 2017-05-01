@@ -120,15 +120,34 @@ void Task::updateHook()
     {
         vrep->getJointPosition(joints_handles[i], &joints_position);
         vrep->getJointVelocity(joints_handles[i], &joints_speed);
-	       if (i>5){
+	//if (((i>5)&&(i<10))||(i>15)){
+	if (i>5){
            joints_readings.elements[i].position = - (double)joints_position;
-		       joints_readings.elements[i].speed = - (double)joints_speed;
+	   joints_readings.elements[i].speed = - (double)joints_speed;
          }else{
            joints_readings.elements[i].position = (double)joints_position;
            joints_readings.elements[i].speed = (double)joints_speed;
          }
     }
-
+    joints_readings.names[0] = "fl_drive";
+    joints_readings.names[1] = "fr_drive";
+    joints_readings.names[2] = "ml_drive";
+    joints_readings.names[3] = "mr_drive";
+    joints_readings.names[4] = "rl_drive";
+    joints_readings.names[5] = "rr_drive";
+    joints_readings.names[6] = "fl_steer";
+    joints_readings.names[7] = "fr_steer";
+    joints_readings.names[8] = "rl_steer";
+    joints_readings.names[9] = "rr_steer";
+    joints_readings.names[10] = "fl_walking";
+    joints_readings.names[11] = "fr_walking";
+    joints_readings.names[12] = "ml_walking";
+    joints_readings.names[13] = "mr_walking";
+    joints_readings.names[14] = "rl_walking";
+    joints_readings.names[15] = "rr_walking";
+    joints_readings.names[16] = "left_passive";
+    joints_readings.names[17] = "right_passive";
+    joints_readings.names[18] = "rear_passive";
     joints_readings.time = base::Time::now();
     _joints_readings.write(joints_readings);
 
