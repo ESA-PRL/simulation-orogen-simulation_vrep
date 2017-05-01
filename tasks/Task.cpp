@@ -83,7 +83,10 @@ void Task::updateHook()
                 vrep->setJointVelocity(joints_handles[i], joints_commands.elements[i].speed);
 
             if(!isnan(joints_commands.elements[GDR].speed))
+	    {
                 vrep->setJointVelocity(joints_handles[i], joints_commands.elements[GDR].speed);
+	    	std::cout << "Setting GDR joints in V-REP" << std::endl;
+	    }
         }
 
 	// Due to having the frame of each steering joints oriented with Z pointing down, each
@@ -104,7 +107,10 @@ void Task::updateHook()
                 vrep->setJointVelocity(joints_handles[i], - joints_commands.elements[i].speed);
 
             if(!isnan(joints_commands.elements[GWW].speed))
+	    {
                 vrep->setJointVelocity(joints_handles[i], - joints_commands.elements[GWW].speed);
+	    	std::cout << "Setting GWW joints in V-REP" << std::endl;
+	    }
         }
     }
 

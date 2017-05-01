@@ -36,7 +36,7 @@ namespace simulation_vrep
         vrep::VREP *vrep;
 
         // Handlers for motors
-        static const int joints_number = 16;
+        static const int joints_number = 19;
         std::vector<int> joints_handles;
         std::vector<std::string> joints_names;
 
