@@ -77,7 +77,7 @@ void Task::updateHook()
 
     if(_joints_commands.read(joints_commands) == RTT::NewData)
     {
-        for(int i = 0; i < 6; i++) //Driving jointss
+        for(int i = 0; i < 6; i++) //Driving joints
         {
             if(!isnan(joints_commands.elements[i].speed))
                 vrep->setJointVelocity(joints_handles[i], joints_commands.elements[i].speed);
@@ -104,11 +104,23 @@ void Task::updateHook()
         for(int i = 10; i < 16; i++) //Walking joints
         {
             if(!isnan(joints_commands.elements[i].speed))
-                vrep->setJointVelocity(joints_handles[i], - joints_commands.elements[i].speed);
-
+	    {
+		vrep->disableControlLoop(joints_handles[i]);
+                vrep->setJointVelocity(joints_handles[i], joints_commands.elements[i].speed);
+	    }
+	    if(!isnan(joints_commands.elements[i].position))
+	    {
+		vrep->enableControlLoop(joints_handles[i]);
+                vrep->setJointPosition(joints_handles[i], joints_commands.elements[i].position);
+	    }
             if(!isnan(joints_commands.elements[GWW].speed))
 	    {
-                vrep->setJointVelocity(joints_handles[i], - joints_commands.elements[GWW].speed);
+                vrep->setJointVelocity(joints_handles[i], joints_commands.elements[GWW].speed);
+	    	std::cout << "Setting GWW joints in V-REP" << std::endl;
+	    }
+	    if(!isnan(joints_commands.elements[GWW].position))
+	    {
+                vrep->setJointPosition(joints_handles[i], joints_commands.elements[GWW].position);
 	    	std::cout << "Setting GWW joints in V-REP" << std::endl;
 	    }
         }
@@ -120,15 +132,18 @@ void Task::updateHook()
     {
         vrep->getJointPosition(joints_handles[i], &joints_position);
         vrep->getJointVelocity(joints_handles[i], &joints_speed);
-	//if (((i>5)&&(i<10))||(i>15)){
-	if (i>5){
-           joints_readings.elements[i].position = - (double)joints_position;
-	   joints_readings.elements[i].speed = - (double)joints_speed;
-         }else{
-           joints_readings.elements[i].position = (double)joints_position;
-           joints_readings.elements[i].speed = (double)joints_speed;
-         }
+	if((i>5)&&(i<10))
+	{
+	    joints_readings.elements[i].position = - (double)joints_position;
+	    joints_readings.elements[i].speed = - (double)joints_speed;
+	}
+	else
+	{
+	    joints_readings.elements[i].position = (double)joints_position;
+	    joints_readings.elements[i].speed = (double)joints_speed;
+	}
     }
+    
     joints_readings.names[0] = "fl_drive";
     joints_readings.names[1] = "fr_drive";
     joints_readings.names[2] = "ml_drive";
@@ -148,6 +163,7 @@ void Task::updateHook()
     joints_readings.names[16] = "left_passive";
     joints_readings.names[17] = "right_passive";
     joints_readings.names[18] = "rear_passive";
+
     joints_readings.time = base::Time::now();
     _joints_readings.write(joints_readings);
 

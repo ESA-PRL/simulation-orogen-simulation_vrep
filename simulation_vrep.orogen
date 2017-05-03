@@ -14,5 +14,5 @@ task_context "Task" do
 
     output_port("joints_readings", "/base/samples/Joints")
 
-    periodic 0.1
+    periodic 0.01
 end
