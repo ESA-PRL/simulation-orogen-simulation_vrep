@@ -156,6 +156,30 @@ void Task::updateHook()
     joints_readings.time = base::Time::now();
     _joints_readings.write(joints_readings);
 
+
+    float position[3] = {0};
+    vrep->getPosition((std::string)"Pose", "", position);
+    pose.position.x() = position[0];
+    pose.position.y() = position[1];
+    pose.position.z() = position[2];
+
+    float orientation[3] = {0};
+    vrep->getOrientation((std::string)"Pose", "", orientation);
+
+    Eigen::Quaterniond q(Eigen::AngleAxisf(orientation[0], Eigen::Vector3f::UnitX())
+        * Eigen::AngleAxisf(orientation[1], Eigen::Vector3f::UnitY())
+        * Eigen::AngleAxisf(orientation[2], Eigen::Vector3f::UnitZ()));
+    pose.orientation = q;
+
+    _pose.write(pose);
+
+    vrep->getPosition((std::string)"GOAL_marker", "", position);
+    vrep->getOrientation((std::string)"GOAL_marker", "", orientation);
+
+    goalWaypoint.position[0] = position[0];
+    goalWaypoint.position[1] = position[1];
+    goalWaypoint.heading = orientation[2];
+    _goalWaypoint.write(goalWaypoint);
 }
 
 void Task::errorHook()

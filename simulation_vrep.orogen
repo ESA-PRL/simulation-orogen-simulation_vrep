@@ -13,6 +13,8 @@ task_context "Task" do
     input_port("joints_commands", "/base/commands/Joints")
 
     output_port("joints_readings", "/base/samples/Joints")
+    output_port("pose", "/base/samples/RigidBodyState")
+    output_port("goalWaypoint", "/base/Waypoint")
 
     periodic 0.01
 end

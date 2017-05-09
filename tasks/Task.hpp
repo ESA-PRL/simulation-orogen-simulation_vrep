@@ -39,6 +39,9 @@ namespace simulation_vrep
         static const int joints_number = 19;
         std::vector<int> joints_handles;
         std::vector<std::string> joints_names;
+        base::samples::RigidBodyState pose;
+
+        base::Waypoint goalWaypoint;
 
         base::commands::Motion2D motion_command;
         base::samples::Joints joints_commands;
