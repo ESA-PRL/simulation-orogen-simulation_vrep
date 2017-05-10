@@ -50,6 +50,7 @@ bool Task::configureHook()
     joints_names.push_back("bogie_rear1");
 
     joints_readings.resize(joints_number);
+    motors_readings.resize(motors_number);
 
     int handle;
     for(int i = 0; i < joints_number; i++)
@@ -115,47 +116,73 @@ void Task::updateHook()
         }
     }
 
-    // Get the joint readings to publish them to ROCK
+  // Get the readings to publish them to ROCK as joint_command_dispatcher works
     float joints_position, joints_speed;
     for(int i = 0; i < joints_number; i++)
     {
+
         vrep->getJointPosition(joints_handles[i], &joints_position);
         vrep->getJointVelocity(joints_handles[i], &joints_speed);
-	if((i>5)&&(i<10))
-	{
-	    joints_readings.elements[i].position = - (double)joints_position;
-	    joints_readings.elements[i].speed = - (double)joints_speed;
-	}
-	else
-	{
-	    joints_readings.elements[i].position = (double)joints_position;
-	    joints_readings.elements[i].speed = (double)joints_speed;
-	}
+
+      // Driving Joints/Motors
+        if (i < 6)
+        {
+            joints_readings.elements[i+13].position = (double)joints_position;
+            joints_readings.elements[i+13].speed = (double)joints_speed;
+            motors_readings.elements[i].position = (double)joints_position;
+	    motors_readings.elements[i].speed = (double)joints_speed;
+        }
+
+      // Steering Joints/Motors
+        if ((i > 5)&&(i < 10))
+        {
+            joints_readings.elements[i+3].position = - (double)joints_position;
+            joints_readings.elements[i+3].speed = - (double)joints_speed;
+            motors_readings.elements[i].position = - (double)joints_position;
+	    motors_readings.elements[i].speed = - (double)joints_speed;
+        }
+
+      // Walking Joints/Motors
+        if ((i > 9)&&(i < 16))
+        {
+            joints_readings.elements[i-7].position = (double)joints_position;
+            joints_readings.elements[i-7].speed = (double)joints_speed;
+            motors_readings.elements[i].position = (double)joints_position;
+	    motors_readings.elements[i].speed = (double)joints_speed;
+        }
+
+      // Bogie Joints
+        if (i > 15)
+        {
+            joints_readings.elements[i-16].position = (double)joints_position;
+            joints_readings.elements[i-16].speed = (double)joints_speed;
+        }
     }
     
-    joints_readings.names[0] = "fl_drive";
-    joints_readings.names[1] = "fr_drive";
-    joints_readings.names[2] = "ml_drive";
-    joints_readings.names[3] = "mr_drive";
-    joints_readings.names[4] = "rl_drive";
-    joints_readings.names[5] = "rr_drive";
-    joints_readings.names[6] = "fl_steer";
-    joints_readings.names[7] = "fr_steer";
-    joints_readings.names[8] = "rl_steer";
-    joints_readings.names[9] = "rr_steer";
-    joints_readings.names[10] = "fl_walking";
-    joints_readings.names[11] = "fr_walking";
-    joints_readings.names[12] = "ml_walking";
-    joints_readings.names[13] = "mr_walking";
-    joints_readings.names[14] = "rl_walking";
-    joints_readings.names[15] = "rr_walking";
-    joints_readings.names[16] = "left_passive";
-    joints_readings.names[17] = "right_passive";
-    joints_readings.names[18] = "rear_passive";
+    joints_readings.names[0] = "left_passive";
+    joints_readings.names[1] = "right_passive";
+    joints_readings.names[2] = "rear_passive";
+    joints_readings.names[3] = "fl_walking";
+    joints_readings.names[4] = "fr_walking";
+    joints_readings.names[5] = "ml_walking";
+    joints_readings.names[6] = "mr_walking";
+    joints_readings.names[7] = "rl_walking";
+    joints_readings.names[8] = "rr_walking";
+    joints_readings.names[9] = "fl_steer";
+    joints_readings.names[10] = "fr_steer";
+    joints_readings.names[11] = "rl_steer";
+    joints_readings.names[12] = "rr_steer";
+    joints_readings.names[13] = "fl_drive";
+    joints_readings.names[14] = "fr_drive";
+    joints_readings.names[15] = "ml_drive";
+    joints_readings.names[16] = "mr_drive";
+    joints_readings.names[17] = "rl_drive";
+    joints_readings.names[18] = "rr_drive";
 
     joints_readings.time = base::Time::now();
+    motors_readings.time = base::Time::now();
     _joints_readings.write(joints_readings);
-
+    _motors_readings.write(motors_readings);
 
     float position[3] = {0};
     vrep->getPosition((std::string)"Pose", "", position);
