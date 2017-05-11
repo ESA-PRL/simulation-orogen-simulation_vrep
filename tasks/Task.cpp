@@ -61,6 +61,7 @@ bool Task::configureHook()
 
     std::string const message("Controller configured");
     vrep->sendStatusMessage(message.c_str());
+    trajectory.clear();
 
     return true;
 }
@@ -75,6 +76,25 @@ bool Task::startHook()
 void Task::updateHook()
 {
     TaskBase::updateHook();
+
+    if(_trajectory.read(trajectory) == RTT::NewData)
+    {
+        std::vector<float> trajectoryData;
+        for (unsigned int i = 0; i < trajectory.size() ; i++)
+        {
+            trajectoryData.push_back(trajectory[i].position(0));
+            trajectoryData.push_back(trajectory[i].position(1));
+            trajectoryData.push_back(trajectory[i].position(2));
+            trajectoryData.push_back(trajectory[i].heading);
+        }
+        std::cout<< "Trajectory has " << trajectoryData.size()/4 << " Waypoints" << std::endl;
+        for (unsigned int i = 0; i<trajectoryData.size(); i += 4)
+	    std::cout << "Waypoint " << i/4 << " -> Pos: (" << trajectoryData[i] << "," << trajectoryData[i+1] << ") Height: " << trajectoryData[i+2] 
+                      << " Heading: " << trajectoryData[i+3] << std::endl;
+        std::string signalName = "trajectory";
+        const char *signal = signalName.c_str();
+        vrep->appendStringSignal(signal, trajectoryData);
+    }
 
     if(_joints_commands.read(joints_commands) == RTT::NewData)
     {

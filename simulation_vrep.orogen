@@ -11,6 +11,7 @@ task_context "Task" do
     needs_configuration
 
     input_port("joints_commands", "/base/commands/Joints")
+    input_port("trajectory", "/std/vector</base/Waypoint>")
 
     output_port("joints_readings", "/base/samples/Joints")
     output_port("motors_readings", "/base/samples/Joints")
