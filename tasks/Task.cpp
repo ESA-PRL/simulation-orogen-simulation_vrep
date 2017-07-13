@@ -1,4 +1,6 @@
 #include "Task.hpp"
+#include <math.h>
+
 
 using namespace simulation_vrep;
 
@@ -52,6 +54,26 @@ bool Task::configureHook()
     joints_readings.resize(joints_number);
     motors_readings.resize(motors_number);
 
+    joints_readings.names[0] = "left_passive";
+    joints_readings.names[1] = "right_passive";
+    joints_readings.names[2] = "rear_passive";
+    joints_readings.names[3] = "fl_walking";
+    joints_readings.names[4] = "fr_walking";
+    joints_readings.names[5] = "ml_walking";
+    joints_readings.names[6] = "mr_walking";
+    joints_readings.names[7] = "rl_walking";
+    joints_readings.names[8] = "rr_walking";
+    joints_readings.names[9] = "fl_steer";
+    joints_readings.names[10] = "fr_steer";
+    joints_readings.names[11] = "rl_steer";
+    joints_readings.names[12] = "rr_steer";
+    joints_readings.names[13] = "fl_drive";
+    joints_readings.names[14] = "fr_drive";
+    joints_readings.names[15] = "ml_drive";
+    joints_readings.names[16] = "mr_drive";
+    joints_readings.names[17] = "rl_drive";
+    joints_readings.names[18] = "rr_drive";
+
     int handle;
     for(int i = 0; i < joints_number; i++)
     {
@@ -59,10 +81,18 @@ bool Task::configureHook()
         joints_handles.push_back(handle);
     }
 
-    std::string const message("Controller configured");
-    vrep->sendStatusMessage(message.c_str());
-    trajectory.clear();
+    vrep->getObjectHandle("Pose", &roverPoseHandle);
+    vrep->getObjectHandle("GOAL_marker", &goalMarkerHandle);
 
+    std::string const message("Enabling Synchronization");
+    vrep->sendStatusMessage(message.c_str());
+    t0 = base::Time::now();
+
+    for(int i = 0; i < joints_number; i++)
+    {
+        vrep->initJointPositionStreaming(joints_handles[i], &joints_position);
+        vrep->initJointVelocityStreaming(joints_handles[i], &joints_speed);
+    }
     return true;
 }
 
@@ -79,7 +109,7 @@ void Task::updateHook()
 
     if(_trajectory.read(trajectory) == RTT::NewData)
     {
-        std::vector<float> trajectoryData;
+        trajectoryData.clear();
         for (unsigned int i = 0; i < trajectory.size() ; i++)
         {
             trajectoryData.push_back(trajectory[i].position(0));
@@ -87,25 +117,19 @@ void Task::updateHook()
             trajectoryData.push_back(trajectory[i].position(2));
             trajectoryData.push_back(trajectory[i].heading);
         }
-        std::cout<< "Trajectory has " << trajectoryData.size()/4 << " Waypoints" << std::endl;
-        for (unsigned int i = 0; i<trajectoryData.size(); i += 4)
-	    std::cout << "Waypoint " << i/4 << " -> Pos: (" << trajectoryData[i] << "," << trajectoryData[i+1] << ") Height: " << trajectoryData[i+2] 
-                      << " Heading: " << trajectoryData[i+3] << std::endl;
         std::string signalName = "trajectory";
         const char *signal = signalName.c_str();
         vrep->appendStringSignal(signal, trajectoryData);
     }
-
     if(_joints_commands.read(joints_commands) == RTT::NewData)
     {
         for(int i = 0; i < 6; i++) //Driving joints
-        {
-            if(!isnan(joints_commands.elements[i].speed))
-                vrep->setJointVelocity(joints_handles[i], joints_commands.elements[i].speed);
-            if(!isnan(joints_commands.elements[GDR].speed))
-                vrep->setJointVelocity(joints_handles[i], joints_commands.elements[GDR].speed);
-        }
-
+            {
+                if(!isnan(joints_commands.elements[i].speed))
+                    vrep->setJointVelocity(joints_handles[i], joints_commands.elements[i].speed);
+                if(!isnan(joints_commands.elements[GDR].speed))
+                    vrep->setJointVelocity(joints_handles[i], joints_commands.elements[GDR].speed);
+            }
 	// Due to having the frame of each steering joints oriented with Z pointing down, each
 	// command is affected by a minus sign '-'
 
@@ -134,10 +158,11 @@ void Task::updateHook()
 	    if(!isnan(joints_commands.elements[GWW].position))
                 vrep->setJointPosition(joints_handles[i], joints_commands.elements[GWW].position);
         }
+
     }
 
+
   // Get the readings to publish them to ROCK as joint_command_dispatcher works
-    float joints_position, joints_speed;
     for(int i = 0; i < joints_number; i++)
     {
 
@@ -178,55 +203,28 @@ void Task::updateHook()
             joints_readings.elements[i-16].speed = (double)joints_speed;
         }
     }
-    
-    joints_readings.names[0] = "left_passive";
-    joints_readings.names[1] = "right_passive";
-    joints_readings.names[2] = "rear_passive";
-    joints_readings.names[3] = "fl_walking";
-    joints_readings.names[4] = "fr_walking";
-    joints_readings.names[5] = "ml_walking";
-    joints_readings.names[6] = "mr_walking";
-    joints_readings.names[7] = "rl_walking";
-    joints_readings.names[8] = "rr_walking";
-    joints_readings.names[9] = "fl_steer";
-    joints_readings.names[10] = "fr_steer";
-    joints_readings.names[11] = "rl_steer";
-    joints_readings.names[12] = "rr_steer";
-    joints_readings.names[13] = "fl_drive";
-    joints_readings.names[14] = "fr_drive";
-    joints_readings.names[15] = "ml_drive";
-    joints_readings.names[16] = "mr_drive";
-    joints_readings.names[17] = "rl_drive";
-    joints_readings.names[18] = "rr_drive";
 
     joints_readings.time = base::Time::now();
     motors_readings.time = base::Time::now();
     _joints_readings.write(joints_readings);
     _motors_readings.write(motors_readings);
 
-    float position[3] = {0};
-    vrep->getPosition((std::string)"Pose", "", position);
+    vrep->getPosition(roverPoseHandle, -1, position);
     pose.position.x() = position[0];
     pose.position.y() = position[1];
     pose.position.z() = position[2];
 
-    float orientation[3] = {0};
-    vrep->getOrientation((std::string)"Pose", "", orientation);
-
-    Eigen::Quaterniond q(Eigen::AngleAxisf(orientation[0], Eigen::Vector3f::UnitX())
-        * Eigen::AngleAxisf(orientation[1], Eigen::Vector3f::UnitY())
-        * Eigen::AngleAxisf(orientation[2], Eigen::Vector3f::UnitZ()));
-    pose.orientation = q;
+    vrep->getQuaternion(pose.orientation.w(),pose.orientation.x(),
+                        pose.orientation.y(),pose.orientation.z());
 
     _pose.write(pose);
 
-    vrep->getPosition((std::string)"GOAL_marker", "", position);
-    vrep->getOrientation((std::string)"GOAL_marker", "", orientation);
-
+    vrep->getPosition(goalMarkerHandle, -1, position);
+    vrep->getOrientation(goalMarkerHandle, -1, orientation);
     goalWaypoint.position[0] = position[0];
     goalWaypoint.position[1] = position[1];
     goalWaypoint.heading = orientation[2];
-    _goalWaypoint.write(goalWaypoint);
+    _goalWaypoint.write(goalWaypoint);    
 }
 
 void Task::errorHook()

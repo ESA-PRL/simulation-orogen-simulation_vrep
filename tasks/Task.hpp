@@ -3,6 +3,7 @@
 
 #include "simulation_vrep/TaskBase.hpp"
 #include <vrep/vrep.hpp>
+#include <time.h>
 
 namespace simulation_vrep
 {
@@ -41,16 +42,29 @@ namespace simulation_vrep
         std::vector<int> joints_handles;
         std::vector<std::string> joints_names;
         base::samples::RigidBodyState pose;
+        std::vector<float> trajectoryData;
+        float joints_position, joints_speed;
+        int roverPoseHandle, goalMarkerHandle;
+        float position[3] = {0};
+        float orientation[3] = {0};
+        float q[3] = {0};
+        int time;
+        base::Time t0;
+        base::Time t1;
+        clock_t elapsed_time;
+        clock_t total_time;
 
         base::Waypoint goalWaypoint;
 
         base::commands::Motion2D motion_command;
         base::samples::Joints joints_commands;
+        base::samples::Joints old_joints_commands;
         base::samples::Joints joints_readings;
         base::samples::Joints motors_readings;
 
         std::vector<base::Waypoint> trajectory;
         base::Waypoint currentWaypoint;
+        bool first_iteration;
 
     public:
         Task(std::string const& name = "simulation_vrep::Task");
