@@ -40,6 +40,7 @@ namespace simulation_vrep
         static const int joints_number = 19;
         static const int motors_number = 16;
         std::vector<int> joints_handles;
+        std::vector<int> ptu_handles;
         std::vector<std::string> joints_names;
         base::samples::RigidBodyState pose;
         std::vector<float> trajectoryData;
@@ -58,9 +59,11 @@ namespace simulation_vrep
 
         base::commands::Motion2D motion_command;
         base::samples::Joints joints_commands;
+        base::samples::Joints ptu_commands;
         base::samples::Joints old_joints_commands;
         base::samples::Joints joints_readings;
         base::samples::Joints motors_readings;
+        base::samples::Joints ptu_readings;
 
         std::vector<base::Waypoint> trajectory;
         base::Waypoint currentWaypoint;

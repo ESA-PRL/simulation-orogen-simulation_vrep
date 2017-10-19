@@ -53,6 +53,7 @@ bool Task::configureHook()
 
     joints_readings.resize(joints_number);
     motors_readings.resize(motors_number);
+    ptu_readings.resize(2);
 
     joints_readings.names[0] = "left_passive";
     joints_readings.names[1] = "right_passive";
@@ -74,19 +75,24 @@ bool Task::configureHook()
     joints_readings.names[17] = "rl_drive";
     joints_readings.names[18] = "rr_drive";
 
+    ptu_readings.names[0] = "pan_joint";
+    ptu_readings.names[1] = "tilt_joint";
+
     int handle;
     for(int i = 0; i < joints_number; i++)
     {
         vrep->getObjectHandle(joints_names[i], &handle);
         joints_handles.push_back(handle);
     }
-
+    ptu_handles.resize(2);
+    vrep->getObjectHandle("pan", &ptu_handles[0]);
+    vrep->getObjectHandle("tilt", &ptu_handles[1]);
     vrep->getObjectHandle("Pose", &roverPoseHandle);
     vrep->getObjectHandle("GOAL_marker", &goalMarkerHandle);
 
     std::string const message("Enabling Synchronization");
     vrep->sendStatusMessage(message.c_str());
-    t0 = base::Time::now();
+    t0.microseconds = 1000*vrep->getSimulationTime();
 
     for(int i = 0; i < joints_number; i++)
     {
@@ -121,6 +127,24 @@ void Task::updateHook()
         const char *signal = signalName.c_str();
         vrep->appendStringSignal(signal, trajectoryData);
     }
+
+    if(_ptu_commands.read(ptu_commands) == RTT::NewData)
+    { 
+        for(int i = 0; i < 2; i++)
+        {
+            if(!isnan(ptu_commands.elements[i].speed))
+            {
+                vrep->disableControlLoop(ptu_handles[i]);
+                vrep->setJointVelocity(ptu_handles[i], ptu_commands.elements[i].speed);
+            }
+            if(!isnan(ptu_commands.elements[i].position))
+      	    {
+      		      vrep->enableControlLoop(ptu_handles[i]);
+                vrep->setJointPosition(ptu_handles[i], ptu_commands.elements[i].position);
+      	    }
+        }
+    }
+
     if(_joints_commands.read(joints_commands) == RTT::NewData)
     {
         for(int i = 0; i < 6; i++) //Driving joints
@@ -203,11 +227,20 @@ void Task::updateHook()
             joints_readings.elements[i-16].speed = (double)joints_speed;
         }
     }
+    for(int i = 0; i < 2; i++)
+    {
+        vrep->getJointPosition(ptu_handles[i], &joints_position);
+        vrep->getJointVelocity(ptu_handles[i], &joints_speed);
+        ptu_readings.elements[i].position = (double)joints_position;
+        ptu_readings.elements[i].speed = (double)joints_speed;
+    }
 
-    joints_readings.time = base::Time::now();
-    motors_readings.time = base::Time::now();
+    joints_readings.time.microseconds = 1000*vrep->getSimulationTime();
+    motors_readings.time.microseconds = 1000*vrep->getSimulationTime();
+    ptu_readings.time.microseconds = 1000*vrep->getSimulationTime();
     _joints_readings.write(joints_readings);
     _motors_readings.write(motors_readings);
+    _ptu_readings.write(ptu_readings);
 
     vrep->getPosition(roverPoseHandle, -1, position);
     pose.position.x() = position[0];
@@ -217,6 +250,7 @@ void Task::updateHook()
     vrep->getQuaternion(pose.orientation.w(),pose.orientation.x(),
                         pose.orientation.y(),pose.orientation.z());
 
+    pose.time.microseconds = 1000*vrep->getSimulationTime();
     _pose.write(pose);
 
     vrep->getPosition(goalMarkerHandle, -1, position);
@@ -224,7 +258,7 @@ void Task::updateHook()
     goalWaypoint.position[0] = position[0];
     goalWaypoint.position[1] = position[1];
     goalWaypoint.heading = orientation[2];
-    _goalWaypoint.write(goalWaypoint);    
+    _goalWaypoint.write(goalWaypoint);
 }
 
 void Task::errorHook()
