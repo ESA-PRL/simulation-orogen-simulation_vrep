@@ -31,62 +31,34 @@ bool Task::configureHook()
         return false;
     }
 
-    joints_names.push_back("joint_drive_fl");
-    joints_names.push_back("joint_drive_fr");
-    joints_names.push_back("joint_drive_ml");
-    joints_names.push_back("joint_drive_mr");
-    joints_names.push_back("joint_drive_rl");
-    joints_names.push_back("joint_drive_rr");
-    joints_names.push_back("joint_steer_fl");
-    joints_names.push_back("joint_steer_fr");
-    joints_names.push_back("joint_steer_rl");
-    joints_names.push_back("joint_steer_rr");
-    joints_names.push_back("joint_walk_fl");
-    joints_names.push_back("joint_walk_fr");
-    joints_names.push_back("joint_walk_ml");
-    joints_names.push_back("joint_walk_mr");
-    joints_names.push_back("joint_walk_rl");
-    joints_names.push_back("joint_walk_rr");
-    joints_names.push_back("bogie_lateral_l");
-    joints_names.push_back("bogie_lateral_r");
-    joints_names.push_back("bogie_rear1");
+    joints_names = _joint_vrep_names.get();
+    joints_readings_names = _joint_readings_names.get();
+    ptu_vrep_names = _ptu_vrep_names.get();
+    ptu_readings_names = _ptu_readings_names.get();
 
-    joints_readings.resize(joints_number);
+    joints_readings.resize(joints_readings_names.size());
     motors_readings.resize(motors_number);
-    ptu_readings.resize(2);
+    ptu_readings.resize(ptu_readings_names.size());
 
-    joints_readings.names[0] = "left_passive";
-    joints_readings.names[1] = "right_passive";
-    joints_readings.names[2] = "rear_passive";
-    joints_readings.names[3] = "fl_walking";
-    joints_readings.names[4] = "fr_walking";
-    joints_readings.names[5] = "ml_walking";
-    joints_readings.names[6] = "mr_walking";
-    joints_readings.names[7] = "rl_walking";
-    joints_readings.names[8] = "rr_walking";
-    joints_readings.names[9] = "fl_steer";
-    joints_readings.names[10] = "fr_steer";
-    joints_readings.names[11] = "rl_steer";
-    joints_readings.names[12] = "rr_steer";
-    joints_readings.names[13] = "fl_drive";
-    joints_readings.names[14] = "fr_drive";
-    joints_readings.names[15] = "ml_drive";
-    joints_readings.names[16] = "mr_drive";
-    joints_readings.names[17] = "rl_drive";
-    joints_readings.names[18] = "rr_drive";
+    for (uint i = 0; i < joints_readings.size(); i++)
+        joints_readings.names[i] = joints_readings_names[i];
 
-    ptu_readings.names[0] = "pan_joint";
-    ptu_readings.names[1] = "tilt_joint";
+    for (uint i = 0; i < ptu_readings.size(); i++)
+        ptu_readings.names[i] = ptu_readings_names[i];
+    /*ptu_readings.names[0] = "pan_joint";
+    ptu_readings.names[1] = "tilt_joint";*/
 
-    int handle;
-    for(int i = 0; i < joints_number; i++)
-    {
-        vrep->getObjectHandle(joints_names[i], &handle);
-        joints_handles.push_back(handle);
-    }
-    ptu_handles.resize(2);
-    vrep->getObjectHandle("pan", &ptu_handles[0]);
-    vrep->getObjectHandle("tilt", &ptu_handles[1]);
+    joints_handles.resize(joints_names.size());
+    ptu_handles.resize(ptu_vrep_names.size());
+
+    for(int i = 0; i < joints_names.size(); i++)
+        vrep->getObjectHandle(joints_names[i], &joints_handles[i]);
+
+    for(int i = 0; i < ptu_vrep_names.size(); i++)
+        vrep->getObjectHandle(ptu_vrep_names[i], &ptu_handles[i]);
+
+    /*vrep->getObjectHandle("pan", &ptu_handles[0]);
+    vrep->getObjectHandle("tilt", &ptu_handles[1]);*/
     vrep->getObjectHandle("Pose", &roverPoseHandle);
     vrep->getObjectHandle("GOAL_marker", &goalMarkerHandle);
 
@@ -129,7 +101,7 @@ void Task::updateHook()
     }
 
     if(_ptu_commands.read(ptu_commands) == RTT::NewData)
-    { 
+    {
         for(int i = 0; i < 2; i++)
         {
             if(!isnan(ptu_commands.elements[i].speed))

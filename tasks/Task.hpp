@@ -42,6 +42,9 @@ namespace simulation_vrep
         std::vector<int> joints_handles;
         std::vector<int> ptu_handles;
         std::vector<std::string> joints_names;
+        std::vector<std::string> joints_readings_names;
+        std::vector<std::string> ptu_vrep_names;
+        std::vector<std::string> ptu_readings_names;
         base::samples::RigidBodyState pose;
         std::vector<float> trajectoryData;
         float joints_position, joints_speed;

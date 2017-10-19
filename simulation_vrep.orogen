@@ -9,6 +9,13 @@ import_types_from "simulation_vrepTypes.hpp"
 
 task_context "Task" do
     needs_configuration
+    
+    property('joint_vrep_names', '/std/vector<std/string>').
+        doc 'Names of locomotion joints in vrep'
+    property('ptu_vrep_names', '/std/vector<std/string>').
+        doc 'Names of ptu joints in vrep'
+    property('joint_readings_names', '/std/vector<std/string>')
+    property('ptu_readings_names', '/std/vector<std/string>')
 
     input_port("joints_commands", "/base/commands/Joints")
     input_port("trajectory", "/std/vector</base/Waypoint>")
