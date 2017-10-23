@@ -2,6 +2,7 @@
 #define SIMULATION_VREP_TASK_TASK_HPP
 
 #include "simulation_vrep/TaskBase.hpp"
+#include <base/commands/Motion2D.hpp>
 #include <vrep/vrep.hpp>
 #include <time.h>
 
