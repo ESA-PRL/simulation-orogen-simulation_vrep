@@ -207,12 +207,11 @@ void Task::updateHook()
         ptu_readings.elements[i].speed = (double)joints_speed;
     }
 
-    joints_readings.time.microseconds = 1000*vrep->getSimulationTime();
-    motors_readings.time.microseconds = 1000*vrep->getSimulationTime();
-    ptu_readings.time.microseconds = 1000*vrep->getSimulationTime();
-    _joints_readings.write(joints_readings);
-    _motors_readings.write(motors_readings);
-    _ptu_readings.write(ptu_readings);
+    int current_time = 1000 * vrep->getSimulationTime();
+
+    joints_readings.time.microseconds = current_time;
+    motors_readings.time.microseconds = current_time;
+    ptu_readings.time.microseconds = current_time;
 
     vrep->getPosition(roverPoseHandle, -1, position);
     pose.position.x() = position[0];
@@ -222,15 +221,19 @@ void Task::updateHook()
     vrep->getQuaternion(pose.orientation.w(),pose.orientation.x(),
                         pose.orientation.y(),pose.orientation.z());
 
-    pose.time.microseconds = 1000*vrep->getSimulationTime();
-    _pose.write(pose);
+    pose.time.microseconds = current_time;
 
     vrep->getPosition(goalMarkerHandle, -1, position);
     vrep->getOrientation(goalMarkerHandle, -1, orientation);
     goalWaypoint.position[0] = position[0];
     goalWaypoint.position[1] = position[1];
     goalWaypoint.heading = orientation[2];
+
+    _pose.write(pose);
     _goalWaypoint.write(goalWaypoint);
+    _joints_readings.write(joints_readings);
+    _motors_readings.write(motors_readings);
+    _ptu_readings.write(ptu_readings);
 }
 
 void Task::errorHook()
