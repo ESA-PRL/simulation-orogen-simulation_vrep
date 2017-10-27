@@ -4,7 +4,7 @@ require 'readline'
 include Orocos
 Orocos.initialize
 
-Orocos.conf.load_dir('../../../bundles/exoter/config/orogen/')
+Orocos.conf.load_dir('../../../../bundles/exoter/config/orogen/')
 
 Orocos.run 'locomotion_control::Task' => 'locomotion_control',
            'simulation_vrep::Task' => 'simulation_vrep' do
