@@ -37,13 +37,12 @@ namespace simulation_vrep
     protected:
         vrep::VREP *vrep;
 
-        // Handlers for motors
-        static const int joints_number = 19;
-        static const int motors_number = 16;
+        int num_motors;
+        int num_joints;
         std::vector<int> joints_handles;
         std::vector<int> ptu_handles;
-        std::vector<std::string> joints_names;
-        std::vector<std::string> joints_readings_names;
+        std::vector<std::string> joint_vrep_names;
+        std::vector<std::string> joint_readings_names;
         std::vector<std::string> ptu_vrep_names;
         std::vector<std::string> ptu_readings_names;
         base::samples::RigidBodyState pose;

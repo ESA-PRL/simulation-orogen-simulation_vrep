@@ -16,6 +16,8 @@ task_context "Task" do
         doc 'Names of ptu joints in vrep'
     property('joint_readings_names', '/std/vector<std/string>')
     property('ptu_readings_names', '/std/vector<std/string>')
+    property('num_motors', 'int')
+    property('num_joints', 'int')
 
     input_port("joints_commands", "/base/commands/Joints")
     input_port("trajectory", "/std/vector</base/Waypoint>")
@@ -27,6 +29,6 @@ task_context "Task" do
     output_port("pose", "/base/samples/RigidBodyState")
     output_port("goalWaypoint", "/base/Waypoint")
 
-    periodic 0.01
+    periodic 0.04
     #port_driven
 end
