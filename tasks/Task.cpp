@@ -42,7 +42,7 @@ bool Task::configureHook()
 
     
 
-    for (uint i = 0; i < num_joints; i++)
+    for (int i = 0; i < num_joints; i++)
         joints_readings.names[i] = joint_readings_names[i];
     
 
