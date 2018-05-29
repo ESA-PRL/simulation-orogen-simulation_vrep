@@ -63,6 +63,8 @@ bool Task::configureHook()
         vrep->initJointVelocityStreaming(joints_handles[i], &joints_speed);
     }
 
+    vrep->getObjectHandle("anaglyphStereoSensor", &cameraHandle); //TODO make config parameter
+
     return true;
 }
 
@@ -172,6 +174,17 @@ void Task::updateHook()
     _pose.write(pose);
     _goalWaypoint.write(goalWaypoint);
     _joints_readings.write(joints_readings);
+
+    // request distance and image
+    int resolution_img[2];
+    std::vector<uint8_t> img;
+    bool black_and_white = true; // TODO make color images work
+    if (vrep->getStereoSensorImage(cameraHandle, resolution_img, img, black_and_white))
+    {
+        base::samples::frame::Frame camera_image(resolution_img[0], resolution_img[1], base::samples::frame::MODE_GRAYSCALE);
+        camera_image.setImage(img);
+        _camera_image.write(camera_image);
+    }
 }
 
 void Task::errorHook()

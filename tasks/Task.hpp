@@ -49,6 +49,7 @@ namespace simulation_vrep
         std::vector<float> trajectoryData;
         float joints_position, joints_speed;
         int roverPoseHandle, goalMarkerHandle;
+        int cameraHandle;
         float position[3] = {0};
         float orientation[3] = {0};
         float q[3] = {0};

@@ -29,6 +29,8 @@ task_context "Task" do
     output_port("pose", "/base/samples/RigidBodyState")
     output_port("goalWaypoint", "/base/Waypoint")
 
+    output_port("camera_image", "/base/samples/frame/Frame")
+
     periodic 0.04
     #port_driven
 end
