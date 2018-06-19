@@ -23,6 +23,8 @@ bool Task::configureHook()
     if(!TaskBase::configureHook())
         return false;
 
+    start_time = base::Time::now();
+
     vrep = new vrep::VREP();
 
     if(vrep->getClientId() == -1)
@@ -40,11 +42,8 @@ bool Task::configureHook()
     num_motors = _num_motors.get();
     num_joints = _num_joints.get();
 
-    
-
     for (int i = 0; i < num_joints; i++)
         joints_readings.names[i] = joint_readings_names[i];
-    
 
     joints_handles.resize(num_joints);
 
@@ -55,13 +54,14 @@ bool Task::configureHook()
 
     std::string const message("Enabling Synchronization");
     vrep->sendStatusMessage(message.c_str());
-    t0.microseconds = 1000*vrep->getSimulationTime();
 
     for(int i = 0; i < num_joints; i++)
     {
         vrep->initJointPositionStreaming(joints_handles[i], &joints_position);
         vrep->initJointVelocityStreaming(joints_handles[i], &joints_speed);
     }
+
+    start_time_sim = vrep->getSimulationTime();
 
     vrep->getObjectHandle("anaglyphStereoSensor", &cameraHandle); //TODO make config parameter
 
@@ -146,9 +146,10 @@ void Task::updateHook()
         joints_readings.elements[i].speed = (double)joints_speed;
     }
 
-    int current_time = 1000 * vrep->getSimulationTime();
+    //int current_time = 1000 * vrep->getSimulationTime();
+    base::Time current_time = getCurrentTime();
 
-    joints_readings.time.microseconds = current_time;
+    joints_readings.time = current_time;
 
     vrep->getPosition(roverPoseHandle, -1, position);
     pose.position.x() = position[0];
@@ -158,7 +159,7 @@ void Task::updateHook()
     vrep->getQuaternion(pose.orientation.w(),pose.orientation.x(),
                         pose.orientation.y(),pose.orientation.z());
 
-    pose.time.microseconds = current_time;
+    pose.time = current_time;
 
 
     /******************/
@@ -183,6 +184,7 @@ void Task::updateHook()
     {
         base::samples::frame::Frame camera_image(resolution_img[0], resolution_img[1], base::samples::frame::MODE_GRAYSCALE);
         camera_image.setImage(img);
+        camera_image.time = current_time;
         _camera_image.write(camera_image);
     }
 }
@@ -208,4 +210,9 @@ void Task::stopHook()
 void Task::cleanupHook()
 {
     TaskBase::cleanupHook();
+}
+
+base::Time Task::getCurrentTime()
+{
+    return base::Time::fromMicroseconds(start_time.toMicroseconds() + 1000*(vrep->getSimulationTime() - start_time_sim));
 }

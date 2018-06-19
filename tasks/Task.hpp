@@ -54,10 +54,8 @@ namespace simulation_vrep
         float orientation[3] = {0};
         float q[3] = {0};
         int time;
-        base::Time t0;
-        base::Time t1;
-        clock_t elapsed_time;
-        clock_t total_time;
+        base::Time start_time;
+        int start_time_sim;
 
         base::Waypoint goalWaypoint;
 
@@ -73,6 +71,7 @@ namespace simulation_vrep
         base::Waypoint currentWaypoint;
         bool first_iteration;
 
+        base::Time getCurrentTime();
     public:
         Task(std::string const& name = "simulation_vrep::Task");
         Task(std::string const& name, RTT::ExecutionEngine* engine);
