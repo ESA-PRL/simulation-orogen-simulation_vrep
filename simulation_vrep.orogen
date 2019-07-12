@@ -18,6 +18,7 @@ task_context "Task" do
     property('ptu_readings_names', '/std/vector<std/string>')
     property('num_motors', 'int')
     property('num_joints', 'int')
+    property('port','int') #Usually either 19997 or 19999
 
     input_port("joints_commands", "/base/commands/Joints")
     input_port("trajectory", "/std/vector</base/Waypoint>")

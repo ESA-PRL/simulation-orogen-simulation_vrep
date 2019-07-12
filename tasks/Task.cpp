@@ -27,7 +27,7 @@ bool Task::configureHook()
 
     vrep = new vrep::VREP();
 
-    if(vrep->getClientId() == -1)
+    if(vrep->startConnection(_port) == -1)
     {
         printf("Could not reach VREP simulation, make sure the simulation is running in VREP\n");
         return false;
